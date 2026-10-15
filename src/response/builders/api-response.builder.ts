@@ -7,7 +7,7 @@ import type { CursorPaginationResult } from '../../pagination/interfaces/cursor-
 
 export class ApiResponseBuilder<T> {
   private readonly data: T | null;
-  private message = 'Request successful';
+  private messageValue = 'Request successful';
   private meta: ApiMeta | null = null;
   private links: ApiLinks | null = null;
 
@@ -15,9 +15,13 @@ export class ApiResponseBuilder<T> {
     this.data = data;
   }
 
-  public withMessage(message: string): this {
-    this.message = message;
+  public message(message: string): this {
+    this.messageValue = message;
     return this;
+  }
+
+  public withMessage(message: string): this {
+    return this.message(message);
   }
 
   public withMeta(meta: ApiMeta): this {
@@ -32,7 +36,7 @@ export class ApiResponseBuilder<T> {
 
   public build(): BuiltResponse<T> {
     return {
-      message: this.message,
+      message: this.messageValue,
       data: this.data,
       meta: this.meta,
       links: this.links,

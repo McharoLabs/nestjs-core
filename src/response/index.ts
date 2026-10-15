@@ -6,3 +6,5 @@ export * from './enums/sort-order.enum';
 export * from './interfaces/api-response.interface';
 export * from '../pagination/interfaces/cursor-pagination-result.interface';
 export * from './interceptors/response.interceptor';
+export * from './interfaces/built-response.interface';
+export * from './interfaces/wrapper.interface';

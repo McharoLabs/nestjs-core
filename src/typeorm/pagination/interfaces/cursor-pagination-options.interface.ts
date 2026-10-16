@@ -1,4 +1,4 @@
-import { ObjectLiteral, SelectQueryBuilder } from 'typeorm';
+import type { ObjectLiteral, SelectQueryBuilder } from 'typeorm';
 import type { PaginationDirectionEnum, SortOrderEnum } from '../../../response';
 
 export interface CursorPaginationOptions<T extends ObjectLiteral> {

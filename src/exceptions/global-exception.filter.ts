@@ -32,7 +32,7 @@ interface DatabaseDriverError {
 }
 
 interface NormalizedException {
-  status: HttpStatus;
+  status: number;
   message: string;
   errorCode: string;
   errorDetails: Record<string, unknown>;

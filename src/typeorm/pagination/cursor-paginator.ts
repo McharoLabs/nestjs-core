@@ -3,9 +3,9 @@ import { SortOrderEnum } from '../../response/enums/sort-order.enum';
 
 import type { CursorPaginationResult } from './interfaces/cursor-pagination-result.interface';
 import type { CursorPaginationOptions } from './interfaces/cursor-pagination-options.interface';
-import type { BaseResponseDto } from '../../response';
+import type { BaseProjection } from '../projection/base.projection';
 
-export async function paginateCursor<T extends BaseResponseDto>({
+export async function paginateCursor<T extends BaseProjection>({
   queryBuilder,
   alias,
   cursor,

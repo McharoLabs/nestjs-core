@@ -1,6 +1,6 @@
-import type { BaseResponseDto } from '../../../response';
+import type { BaseProjection } from '../../projection/base.projection';
 
-export interface CursorPaginationResult<T extends BaseResponseDto> {
+export interface CursorPaginationResult<T extends BaseProjection> {
   data: T[];
   nextCursor: number | null;
   previousCursor: number | null;

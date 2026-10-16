@@ -1,7 +1,8 @@
-import type { ObjectLiteral, SelectQueryBuilder } from 'typeorm';
+import type { SelectQueryBuilder } from 'typeorm';
 import type { PaginationDirectionEnum, SortOrderEnum } from '../../../response';
+import type { BaseProjection } from '../../projection/base.projection';
 
-export interface CursorPaginationOptions<T extends ObjectLiteral> {
+export interface CursorPaginationOptions<T extends BaseProjection> {
   queryBuilder: SelectQueryBuilder<T>;
   alias: string;
   cursor?: number | null;

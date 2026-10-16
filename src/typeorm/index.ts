@@ -4,3 +4,4 @@ export * from './projection/base.projection';
 export * from './query/filter-builder.util';
 export * from './query/select-projection.util';
 export * from './pagination/interfaces/cursor-pagination-result.interface';
+export * from './pagination/interfaces/paginated-response-result.interface';

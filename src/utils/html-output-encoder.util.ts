@@ -3,7 +3,7 @@ import * as he from 'he';
 type PlainObject = Record<string, unknown>;
 
 const SKIPPED_KEYS = new Set([
-  // wrapper/system fields
+  // Wrapper/system fields
   'success',
   'statusCode',
   'message',
@@ -11,7 +11,7 @@ const SKIPPED_KEYS = new Set([
   'timestamp',
   'error',
 
-  // pagination/navigation links & metadata
+  // Pagination/navigation fields
   'links',
   'first',
   'previous',
@@ -24,20 +24,18 @@ const SKIPPED_KEYS = new Set([
   'nextCursor',
   'previousCursor',
 
-  // file/download values
+  // File/download values
   'url',
 ]);
 
-// Explicitly provide a return type on the fallback function to satisfy explicit-function-return-type
-const safeEncode =
-  (
-    he as unknown as {
-      encode?: (
-        text: string,
-        options?: { useNamedReferences?: boolean },
-      ) => string;
-    }
-  ).encode ?? ((text: string): string => text);
+const safeEncode: (
+  text: string,
+  options?: { useNamedReferences?: boolean },
+) => string =
+  typeof he.encode === 'function'
+    ? (text: string, options?: { useNamedReferences?: boolean }): string =>
+        he.encode(text, options)
+    : (text: string): string => text;
 
 export function encodeHtmlOutput<T>(value: T): T {
   return encodeValue(value) as T;
@@ -49,7 +47,7 @@ function encodeValue(value: unknown, key?: string): unknown {
   }
 
   if (typeof value === 'string') {
-    if (key && SKIPPED_KEYS.has(key)) {
+    if (key !== undefined && SKIPPED_KEYS.has(key)) {
       return value;
     }
 
@@ -63,7 +61,7 @@ function encodeValue(value: unknown, key?: string): unknown {
   }
 
   if (Array.isArray(value)) {
-    return value.map((item) => encodeValue(item));
+    return value.map((item: unknown) => encodeValue(item));
   }
 
   if (typeof value === 'object') {
@@ -71,12 +69,9 @@ function encodeValue(value: unknown, key?: string): unknown {
     const encodedObject: PlainObject = {};
 
     for (const [objectKey, objectFieldValue] of Object.entries(objectValue)) {
-      if (SKIPPED_KEYS.has(objectKey)) {
-        encodedObject[objectKey] = objectFieldValue;
-        continue;
-      }
-
-      encodedObject[objectKey] = encodeValue(objectFieldValue, objectKey);
+      encodedObject[objectKey] = SKIPPED_KEYS.has(objectKey)
+        ? objectFieldValue
+        : encodeValue(objectFieldValue, objectKey);
     }
 
     return encodedObject;

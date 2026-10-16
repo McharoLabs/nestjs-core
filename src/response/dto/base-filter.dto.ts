@@ -11,6 +11,7 @@ import {
 
 import { PaginationDirectionEnum } from '../enums/pagination-direction.enum';
 import { SortOrderEnum } from '../enums/sort-order.enum';
+import { UnmaskId } from '../../masker';
 
 export class BaseFilterDto {
   @ApiPropertyOptional({
@@ -23,6 +24,7 @@ export class BaseFilterDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @UnmaskId()
   cursor?: number | null;
 
   @ApiPropertyOptional({

@@ -1,7 +1,7 @@
 import type { SelectQueryBuilder } from 'typeorm';
 
 import type { BaseEntity } from '../entities/base.entity';
-import type { BaseFilterDto } from '../response/dto/base-filter.dto';
+import type { BaseFilterDto } from '../../response/dto/base-filter.dto';
 
 type AllowedKeys<T> = Exclude<
   keyof T,

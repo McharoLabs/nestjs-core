@@ -26,7 +26,7 @@ export abstract class BaseEntity extends BaseAuditableEntity {
     type: 'boolean',
     default: false,
   })
-  public deleted: boolean = false;
+  public deleted = false;
 
   @DeleteDateColumn({
     type: 'timestamp with time zone',

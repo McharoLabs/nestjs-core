@@ -1,19 +1,15 @@
 import type { ApiLinks, ApiMeta } from '../interfaces/api-response.interface';
-import type {
-  BuiltResponse,
-  CursorMasker,
-} from '../interfaces/built-response.interface';
-import type { CursorPaginationResult } from '../../pagination/interfaces/cursor-pagination-result.interface';
+import type { WrappedResponse } from '../interfaces/wrapper.interface';
+import type { CursorPaginationResult } from '../../typeorm/pagination/interfaces/cursor-pagination-result.interface';
+import { getMaskerService } from '../../masker/masker.registry';
+import type { BaseResponseDto } from '../dto/base-response.dto';
 
 export class ApiResponseBuilder<T> {
-  private readonly data: T | null;
   private messageValue = 'Request successful';
-  private meta: ApiMeta | null = null;
-  private links: ApiLinks | null = null;
+  private metaValue: ApiMeta | null = null;
+  private linksValue: ApiLinks | null = null;
 
-  public constructor(data: T | null) {
-    this.data = data;
-  }
+  public constructor(private readonly data: T | null) {}
 
   public message(message: string): this {
     this.messageValue = message;
@@ -25,34 +21,35 @@ export class ApiResponseBuilder<T> {
   }
 
   public withMeta(meta: ApiMeta): this {
-    this.meta = meta;
+    this.metaValue = meta;
     return this;
   }
 
   public withLinks(links: ApiLinks): this {
-    this.links = links;
+    this.linksValue = links;
     return this;
   }
 
-  public build(): BuiltResponse<T> {
+  public build(): WrappedResponse<T> {
     return {
       message: this.messageValue,
       data: this.data,
-      meta: this.meta,
-      links: this.links,
+      meta: this.metaValue,
+      links: this.linksValue,
     };
   }
 }
 
 export class AppApiResponse {
-  public static ok<T>(data: T): ApiResponseBuilder<T> {
+  public static ok<T extends BaseResponseDto>(data: T): ApiResponseBuilder<T> {
     return new ApiResponseBuilder<T>(data);
   }
 
-  public static paginated<T>(
+  public static paginated<T extends BaseResponseDto>(
     result: CursorPaginationResult<T>,
-    masker: CursorMasker,
   ): ApiResponseBuilder<T[]> {
+    const masker = getMaskerService();
+
     const meta: ApiMeta = {
       itemsPerPage: result.data.length,
       hasNext: result.hasNext,

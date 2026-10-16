@@ -1,6 +1,6 @@
 {
   "name": "@mcharolabs/nestjs-core",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Reusable NestJS core library providing auditing, entities, exceptions, pagination, and standardized API responses",
   "type": "commonjs",
   "main": "./dist/index.js",
@@ -37,6 +37,7 @@
     "@nestjs/typeorm": "^12.0.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.4",
+    "hashids": "^2.3.0",
     "he": "^2.0.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",

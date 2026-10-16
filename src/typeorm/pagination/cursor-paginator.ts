@@ -1,12 +1,11 @@
-import type { ObjectLiteral, SelectQueryBuilder } from 'typeorm';
-
-import { PaginationDirectionEnum } from '../response/enums/pagination-direction.enum';
-import { SortOrderEnum } from '../response/enums/sort-order.enum';
+import { PaginationDirectionEnum } from '../../response/enums/pagination-direction.enum';
+import { SortOrderEnum } from '../../response/enums/sort-order.enum';
 
 import type { CursorPaginationResult } from './interfaces/cursor-pagination-result.interface';
 import type { CursorPaginationOptions } from './interfaces/cursor-pagination-options.interface';
+import type { BaseResponseDto } from '../../response';
 
-export async function paginateCursor<T extends ObjectLiteral>({
+export async function paginateCursor<T extends BaseResponseDto>({
   queryBuilder,
   alias,
   cursor,
@@ -60,8 +59,8 @@ export async function paginateCursor<T extends ObjectLiteral>({
     };
   }
 
-  const firstId = Number(first.id);
-  const lastId = Number(last.id);
+  const firstId = first.id;
+  const lastId = last.id;
 
   const hasNext = isPrevious ? hasCursor : hasMore;
   const hasPrevious = isPrevious ? hasMore : hasCursor;

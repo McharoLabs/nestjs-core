@@ -3,55 +3,92 @@ import {
   type CallHandler,
   type ExecutionContext,
   type NestInterceptor,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import type { ApiResponseDto } from '../interfaces/api-response.interface';
-import type { WrappedResponse } from '../interfaces/wrapper.interface';
+import { ApiResponseDto } from '../dto/api-response.dto';
+import type { BaseResponseDto } from '../dto/base-response.dto';
 import { encodeHtmlOutput } from '../../utils';
+import type { WrappedResponse } from '../interfaces/wrapper.interface';
 
-function isWrappedResponse<T>(value: unknown): value is WrappedResponse<T> {
+function isBaseResponseDto(value: unknown): value is BaseResponseDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  return 'id' in value && 'createdAt' in value && 'updatedAt' in value;
+}
+
+function assertBaseResponseDto(
+  value: unknown,
+): asserts value is BaseResponseDto | BaseResponseDto[] | null {
+  if (value === null) {
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    if (!value.every(isBaseResponseDto)) {
+      throw new InternalServerErrorException(
+        'Response data must contain BaseResponseDto instances.',
+      );
+    }
+
+    return;
+  }
+
+  if (!isBaseResponseDto(value)) {
+    throw new InternalServerErrorException(
+      'Response data must extend BaseResponseDto.',
+    );
+  }
+}
+
+function isWrappedResponse(value: unknown): value is WrappedResponse<unknown> {
   if (typeof value !== 'object' || value === null) {
     return false;
   }
 
   return (
-    'data' in value || 'message' in value || 'meta' in value || 'links' in value
+    'data' in value &&
+    'message' in value &&
+    typeof value.message === 'string' &&
+    'meta' in value &&
+    'links' in value
   );
 }
 
 @Injectable()
-export class ResponseInterceptor<T> implements NestInterceptor<
-  T,
-  ApiResponseDto<T>
+export class ResponseInterceptor implements NestInterceptor<
+  unknown,
+  ApiResponseDto
 > {
   public intercept(
     context: ExecutionContext,
-    next: CallHandler<T>,
-  ): Observable<ApiResponseDto<T>> {
+    next: CallHandler<unknown>,
+  ): Observable<ApiResponseDto> {
     const httpContext = context.switchToHttp();
     const request = httpContext.getRequest<Request>();
     const response = httpContext.getResponse<Response>();
 
     return next.handle().pipe(
-      map((result: T | WrappedResponse<T>): ApiResponseDto<T> => {
-        const wrapped = isWrappedResponse<T>(result);
+      map((result: unknown): ApiResponseDto => {
+        const wrapped = isWrappedResponse(result);
+        const data: unknown = wrapped ? result.data : result;
 
-        const data: T | null = wrapped ? (result.data ?? null) : result;
+        assertBaseResponseDto(data);
 
         return {
           success: true,
           statusCode: response.statusCode,
-          message: wrapped
-            ? (result.message ?? 'Request successful')
-            : 'Request successful',
-          path: request.originalUrl ?? request.url,
+          message: wrapped ? result.message : 'Request successful',
+          path: request.originalUrl,
           timestamp: new Date().toISOString(),
           data: encodeHtmlOutput(data),
-          meta: wrapped ? (result.meta ?? null) : null,
-          links: wrapped ? (result.links ?? null) : null,
+          meta: wrapped ? result.meta : null,
+          links: wrapped ? result.links : null,
           error: null,
         };
       }),

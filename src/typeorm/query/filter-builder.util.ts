@@ -1,7 +1,7 @@
 import type { SelectQueryBuilder } from 'typeorm';
 
-import type { BaseEntity } from '../entities/base.entity';
 import type { BaseFilterDto } from '../../response/dto/base-filter.dto';
+import type { AppBaseEntity } from '../entities/base.entity';
 
 type AllowedKeys<T> = Exclude<
   keyof T,
@@ -10,21 +10,21 @@ type AllowedKeys<T> = Exclude<
 
 type Prev = [never, 0, 1, 2, 3, 4];
 
-type NestedPaths<T extends BaseEntity, D extends number = 3> = D extends 0
+type NestedPaths<T extends AppBaseEntity, D extends number = 3> = D extends 0
   ? never
   : {
       [K in AllowedKeys<T>]: T[K] extends (infer U)[]
-        ? U extends BaseEntity
+        ? U extends AppBaseEntity
           ? K | `${K & string}.${NestedPaths<U, Prev[D]> & string}`
           : K
-        : T[K] extends BaseEntity
+        : T[K] extends AppBaseEntity
           ? K | `${K & string}.${NestedPaths<T[K], Prev[D]> & string}`
           : K;
     }[AllowedKeys<T>];
 
-export type FilterField<T extends BaseEntity> = NestedPaths<T>;
+export type FilterField<T extends AppBaseEntity> = NestedPaths<T>;
 
-export interface FilterOptions<T extends BaseEntity, S = string> {
+export interface FilterOptions<T extends AppBaseEntity, S = string> {
   qb: SelectQueryBuilder<T>;
   alias: string;
 
@@ -52,7 +52,7 @@ export interface FilterOptions<T extends BaseEntity, S = string> {
  *
  * This relies on the joins already registered on the QueryBuilder.
  */
-function resolveFieldPath<T extends BaseEntity>(
+function resolveFieldPath<T extends AppBaseEntity>(
   qb: SelectQueryBuilder<T>,
   rootAlias: string,
   field: string,
@@ -192,7 +192,7 @@ function resolveFieldPath<T extends BaseEntity>(
  * an `andSearchFields` option and create a separate grouped
  * AND condition before combining it with the OR search group.
  */
-export function applySearchFilters<T extends BaseEntity, S = string>(
+export function applySearchFilters<T extends AppBaseEntity, S = string>(
   options: FilterOptions<T, S>,
 ): SelectQueryBuilder<T> {
   const {

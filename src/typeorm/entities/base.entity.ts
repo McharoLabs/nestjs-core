@@ -8,7 +8,7 @@ import {
 
 import { BaseAuditableEntity } from './base-auditable.entity';
 
-export abstract class BaseEntity extends BaseAuditableEntity {
+export abstract class AppBaseEntity extends BaseAuditableEntity {
   @PrimaryGeneratedColumn()
   public id: number;
 

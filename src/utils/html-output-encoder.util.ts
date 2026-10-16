@@ -1,5 +1,3 @@
-import * as he from 'he';
-
 type PlainObject = Record<string, unknown>;
 
 const SKIPPED_KEYS = new Set([
@@ -28,14 +26,14 @@ const SKIPPED_KEYS = new Set([
   'url',
 ]);
 
-const safeEncode: (
-  text: string,
-  options?: { useNamedReferences?: boolean },
-) => string =
-  typeof he.encode === 'function'
-    ? (text: string, options?: { useNamedReferences?: boolean }): string =>
-        he.encode(text, options)
-    : (text: string): string => text;
+function nativeHtmlEncode(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 export function encodeHtmlOutput<T>(value: T): T {
   return encodeValue(value) as T;
@@ -51,9 +49,7 @@ function encodeValue(value: unknown, key?: string): unknown {
       return value;
     }
 
-    return safeEncode(value, {
-      useNamedReferences: true,
-    });
+    return nativeHtmlEncode(value);
   }
 
   if (value instanceof Date) {

@@ -1,6 +1,6 @@
 {
   "name": "@mcharolabs/nestjs-core",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Reusable NestJS core library providing auditing, entities, exceptions, pagination, and standardized API responses",
   "type": "commonjs",
   "main": "./dist/index.js",

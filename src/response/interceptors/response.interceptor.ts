@@ -14,12 +14,33 @@ import type { BaseResponseDto } from '../dto/base-response.dto';
 import { encodeHtmlOutput } from '../../utils';
 import type { WrappedResponse } from '../interfaces/wrapper.interface';
 
-function isBaseResponseDto(value: unknown): value is BaseResponseDto {
-  if (typeof value !== 'object' || value === null) {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isValidDate(value: unknown): boolean {
+  if (value instanceof Date) {
+    return !Number.isNaN(value.getTime());
+  }
+
+  if (typeof value !== 'string') {
     return false;
   }
 
-  return 'id' in value && 'createdAt' in value && 'updatedAt' in value;
+  return value.length > 0 && !Number.isNaN(Date.parse(value));
+}
+
+function isBaseResponseDto(value: unknown): value is BaseResponseDto {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    typeof value.id === 'number' &&
+    Number.isFinite(value.id) &&
+    isValidDate(value.createdAt) &&
+    isValidDate(value.updatedAt)
+  );
 }
 
 function assertBaseResponseDto(
@@ -32,7 +53,7 @@ function assertBaseResponseDto(
   if (Array.isArray(value)) {
     if (!value.every(isBaseResponseDto)) {
       throw new InternalServerErrorException(
-        'Response data must contain BaseResponseDto instances.',
+        'Response data must contain objects extending BaseResponseDto.',
       );
     }
 
@@ -46,8 +67,10 @@ function assertBaseResponseDto(
   }
 }
 
-function isWrappedResponse(value: unknown): value is WrappedResponse<unknown> {
-  if (typeof value !== 'object' || value === null) {
+function isWrappedResponse(
+  value: unknown,
+): value is WrappedResponse<BaseResponseDto | BaseResponseDto[]> {
+  if (!isRecord(value)) {
     return false;
   }
 

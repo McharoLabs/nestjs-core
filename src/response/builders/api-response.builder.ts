@@ -4,7 +4,9 @@ import type { CursorPaginationResult } from '../../typeorm/pagination/interfaces
 import { getMaskerService } from '../../masker/masker.registry';
 import type { BaseResponseDto } from '../dto/base-response.dto';
 
-export class ApiResponseBuilder<T> {
+export class ApiResponseBuilder<
+  T extends BaseResponseDto | BaseResponseDto[] = BaseResponseDto,
+> {
   private messageValue = 'Request successful';
   private metaValue: ApiMeta | null = null;
   private linksValue: ApiLinks | null = null;

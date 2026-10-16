@@ -10,3 +10,5 @@ export * from './enums/pagination-direction.enum';
 export * from './enums/sort-order.enum';
 
 export * from './interceptors/response.interceptor';
+
+export * from './interfaces/wrapper.interface';

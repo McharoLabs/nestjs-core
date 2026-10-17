@@ -1,18 +1,9 @@
 import type { EntityMetadata, SelectQueryBuilder } from 'typeorm';
 
-import type { BaseProjection } from '..';
+import type { AppBaseEntity } from '../entities/base.entity';
+import type { Projection } from '../types/projection.type';
 
-export type Projection<T extends BaseProjection> = {
-  [K in keyof T]?: T[K] extends (infer U)[]
-    ? U extends BaseProjection
-      ? Projection<U>
-      : boolean
-    : T[K] extends BaseProjection
-      ? Projection<T[K]>
-      : boolean;
-};
-
-export function selectProjection<T extends BaseProjection>(
+export function selectProjection<T extends AppBaseEntity>(
   qb: SelectQueryBuilder<T>,
   rootAlias: string,
   projection: Projection<T>,
@@ -41,7 +32,7 @@ export function selectProjection<T extends BaseProjection>(
   return qb.select([...selections]);
 }
 
-function processProjection<T extends BaseProjection>(
+function processProjection<T extends AppBaseEntity>(
   qb: SelectQueryBuilder<T>,
   metadata: EntityMetadata,
   alias: string,

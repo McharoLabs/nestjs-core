@@ -96,7 +96,7 @@ function resolveFieldPath<T extends AppBaseEntity>(
    *   name
    */
   const relationPath = parts.slice(0, -1).join('.');
-  const property = parts[parts.length - 1];
+  const property = parts.at(-1);
 
   if (!property) {
     throw new Error(`Invalid field path "${field}".`);

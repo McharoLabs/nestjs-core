@@ -1,9 +1,8 @@
 import type { BaseResponseDto } from '../../../response';
+import type { PaginationMetadata } from './pagination-metadata.interface';
 
-export interface PaginatedResponseResult<T extends BaseResponseDto> {
+export interface PaginatedResponseResult<
+  T extends BaseResponseDto,
+> extends PaginationMetadata {
   data: T[];
-  nextCursor: number | null;
-  previousCursor: number | null;
-  hasNext: boolean;
-  hasPrevious: boolean;
 }

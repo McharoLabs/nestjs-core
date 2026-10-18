@@ -1,19 +1,24 @@
 import type { AppBaseEntity } from '../entities/base.entity';
 import type { BaseProjection } from '../projection/base.projection';
+
 import { selectProjection } from '../query/select-projection.util';
 
 import { PaginationDirectionEnum } from '../../response/enums/pagination-direction.enum';
 import { SortOrderEnum } from '../../response/enums/sort-order.enum';
+import type { CursorPaginationOptions } from '../pagination/interfaces/cursor-pagination-options.interface';
+import type { CursorPaginationResult } from '../pagination/interfaces/cursor-pagination-result.interface';
 
-import type { CursorPaginationResult } from './interfaces/cursor-pagination-result.interface';
-import type { CursorPaginationOptions } from './interfaces/cursor-pagination-options.interface';
-
-export function paginateCursor<TEntity extends AppBaseEntity>(
-  options: CursorPaginationOptions<TEntity, TEntity> & {
+// No mapper: return the requested projection type.
+export function paginateCursor<
+  TResult extends BaseProjection,
+  TEntity extends AppBaseEntity = AppBaseEntity,
+>(
+  options: CursorPaginationOptions<TEntity, TResult> & {
     map?: undefined;
   },
-): Promise<CursorPaginationResult<TEntity>>;
+): Promise<CursorPaginationResult<TResult>>;
 
+// Mapper provided: return the mapped result type.
 export function paginateCursor<
   TEntity extends AppBaseEntity,
   TResult extends BaseProjection,
@@ -23,6 +28,7 @@ export function paginateCursor<
   },
 ): Promise<CursorPaginationResult<TResult>>;
 
+// Implementation
 export async function paginateCursor<
   TEntity extends AppBaseEntity,
   TResult extends BaseProjection = TEntity,
@@ -41,6 +47,7 @@ export async function paginateCursor<
   } = options;
 
   validateLimit(limit);
+
   selectProjection(queryBuilder, alias, projection);
 
   const isPrevious = direction === PaginationDirectionEnum.PREVIOUS;
@@ -87,7 +94,7 @@ export async function paginateCursor<
   const hasNext = isPrevious ? hasCursor : hasMore;
   const hasPrevious = isPrevious ? hasMore : hasCursor;
 
-  const data = map ? entities.map(map) : (entities as unknown as TResult[]);
+  const data = map ? entities.map(map) : projectEntities<TResult>(entities);
 
   return {
     data,
@@ -96,6 +103,13 @@ export async function paginateCursor<
     hasNext,
     hasPrevious,
   };
+}
+
+function projectEntities<TResult extends BaseProjection>(
+  entities: AppBaseEntity[],
+): TResult[] {
+  // Relies on selectProjection() selecting the requested shape.
+  return entities as unknown as TResult[];
 }
 
 function validateLimit(limit: number): void {
@@ -112,11 +126,9 @@ function getQueryOrder(
     return sortOrder;
   }
 
-  if (sortOrder === SortOrderEnum.ASC) {
-    return SortOrderEnum.DESC;
-  }
-
-  return SortOrderEnum.ASC;
+  return sortOrder === SortOrderEnum.ASC
+    ? SortOrderEnum.DESC
+    : SortOrderEnum.ASC;
 }
 
 function applyCursorFilter<TEntity extends AppBaseEntity>(
@@ -127,7 +139,7 @@ function applyCursorFilter<TEntity extends AppBaseEntity>(
   direction: PaginationDirectionEnum,
   sortOrder: SortOrderEnum,
 ): void {
-  if (!hasCursor) {
+  if (!hasCursor || cursor === null || cursor === undefined) {
     return;
   }
 

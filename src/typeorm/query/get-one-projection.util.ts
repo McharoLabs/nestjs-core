@@ -16,13 +16,17 @@ export interface ProjectionQueryOptions<
   map?: (entity: TEntity) => TResult;
 }
 
-// --- getOneProjection Overloads ---
-export function getOneProjection<TEntity extends AppBaseEntity>(
-  options: ProjectionQueryOptions<TEntity, TEntity> & {
+// No mapper: the caller specifies the result projection type.
+export function getOneProjection<
+  TResult extends BaseProjection,
+  TEntity extends AppBaseEntity = AppBaseEntity,
+>(
+  options: ProjectionQueryOptions<TEntity, TResult> & {
     map?: undefined;
   },
-): Promise<TEntity | null>;
+): Promise<TResult | null>;
 
+// With mapper: the caller specifies both entity and result types.
 export function getOneProjection<
   TEntity extends AppBaseEntity,
   TResult extends BaseProjection,
@@ -32,7 +36,7 @@ export function getOneProjection<
   },
 ): Promise<TResult | null>;
 
-// --- getOneProjection Implementation ---
+// Implementation
 export async function getOneProjection<
   TEntity extends AppBaseEntity,
   TResult extends BaseProjection = TEntity,
@@ -45,7 +49,7 @@ export async function getOneProjection<
 
   const entity = await queryBuilder.getOne();
 
-  if (entity === null) {
+  if (!entity) {
     return null;
   }
 
@@ -54,40 +58,4 @@ export async function getOneProjection<
   }
 
   return entity;
-}
-
-// --- getManyProjection Overloads ---
-export function getManyProjection<TEntity extends AppBaseEntity>(
-  options: ProjectionQueryOptions<TEntity, TEntity> & {
-    map?: undefined;
-  },
-): Promise<TEntity[]>;
-
-export function getManyProjection<
-  TEntity extends AppBaseEntity,
-  TResult extends BaseProjection,
->(
-  options: ProjectionQueryOptions<TEntity, TResult> & {
-    map: (entity: TEntity) => TResult;
-  },
-): Promise<TResult[]>;
-
-// --- getManyProjection Implementation ---
-export async function getManyProjection<
-  TEntity extends AppBaseEntity,
-  TResult extends BaseProjection = TEntity,
->(
-  options: ProjectionQueryOptions<TEntity, TResult>,
-): Promise<TEntity[] | TResult[]> {
-  const { queryBuilder, alias, projection, map } = options;
-
-  selectProjection(queryBuilder, alias, projection);
-
-  const entities = await queryBuilder.getMany();
-
-  if (map) {
-    return entities.map(map);
-  }
-
-  return entities;
 }

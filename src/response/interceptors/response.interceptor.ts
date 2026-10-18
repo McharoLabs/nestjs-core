@@ -36,10 +36,11 @@ function isBaseResponseDto(value: unknown): value is BaseResponseDto {
   }
 
   return (
-    typeof value.id === 'number' &&
-    Number.isFinite(value.id) &&
-    isValidDate(value.createdAt) &&
-    isValidDate(value.updatedAt)
+    (typeof value.id === 'number' && Number.isFinite(value.id)) ||
+    (typeof value.id === 'string' &&
+      value.id.length > 0 &&
+      isValidDate(value.createdAt) &&
+      isValidDate(value.updatedAt))
   );
 }
 

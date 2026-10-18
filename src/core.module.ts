@@ -1,9 +1,10 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { DynamicModule, Global, Module } from '@nestjs/common';
 
 import type { ICoreModuleAsyncOptions } from './interfaces/core-module-async-options.interface';
 import { CORE_CONFIG } from './constants/core.constants';
 import { MaskerService } from './masker';
 
+@Global()
 @Module({})
 export class CoreModule {
   public static forRootAsync<TArgs extends unknown[] = unknown[]>(
@@ -20,7 +21,7 @@ export class CoreModule {
         },
         MaskerService,
       ],
-      exports: [MaskerService],
+      exports: [CORE_CONFIG, MaskerService],
     };
   }
 }

@@ -2,7 +2,6 @@ import { applyDecorators } from '@nestjs/common';
 import type { Type } from '@nestjs/common';
 import { ApiExtraModels, ApiOkResponse, getSchemaPath } from '@nestjs/swagger';
 
-import type { BaseResponseDto } from '../dto/base-response.dto';
 import { ApiResponseDto, ApiMeta, ApiLinks } from '../dto/api-response.dto';
 
 interface ApiResponseWrapperOptions {
@@ -10,30 +9,42 @@ interface ApiResponseWrapperOptions {
   hasPagination?: boolean;
 }
 
-export function ApiResponseWrapper<T extends BaseResponseDto>(
-  model: Type<T>,
+type ResponseModel = Type<unknown>;
+
+export function ApiResponseWrapper(
+  model: ResponseModel,
   options: ApiResponseWrapperOptions = {},
 ): MethodDecorator {
   const { isArray = false, hasPagination = false } = options;
 
   const dataIsArray = isArray || hasPagination;
 
+  const primitiveSchemas: Record<string, object> = {
+    Boolean: { type: 'boolean' },
+    String: { type: 'string' },
+    Number: { type: 'number' },
+  };
+
+  const dataItemSchema = primitiveSchemas[model.name] ?? {
+    $ref: getSchemaPath(model),
+  };
+
   const dataSchema = dataIsArray
     ? {
         type: 'array',
-        items: {
-          $ref: getSchemaPath(model),
-        },
+        items: dataItemSchema,
       }
-    : {
-        $ref: getSchemaPath(model),
-      };
+    : dataItemSchema;
 
   const properties: Record<string, object> = {
     data: dataSchema,
   };
 
-  const extraModels: Type<unknown>[] = [ApiResponseDto, model];
+  const extraModels: ResponseModel[] = [ApiResponseDto];
+
+  if (!(model.name in primitiveSchemas)) {
+    extraModels.push(model);
+  }
 
   if (hasPagination) {
     properties.meta = {

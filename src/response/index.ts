@@ -12,3 +12,4 @@ export * from './enums/sort-order.enum';
 export * from './interceptors/response.interceptor';
 
 export * from './interfaces/wrapper.interface';
+export * from './dto/void-response.dto';
